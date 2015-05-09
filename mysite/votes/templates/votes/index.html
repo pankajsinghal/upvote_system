@@ -1,0 +1,9 @@
+{% if result %}
+    <ul>
+    {% for image in result %}
+        <li><img src="{{ image }}"></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No polls are available.</p>
+{% endif %}
