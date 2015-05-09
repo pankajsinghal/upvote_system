@@ -1,9 +1,16 @@
-{% if result %}
+{% extends "base.html" %}
+{% block content %}
+pankaj
+{% if photo_result %}
     <ul>
-    {% for image in result %}
-        <li><img src="{{ image }}"></li>
+    {% for photo_object in photo_result %}
+        <li>{{ photo_object.name }}"</li>
+        <li><img src="static/photos/{{photo_object.url}}"></li>
+        <li>{{ photo_object.upvotes }}"</li>
+        <li>{{ photo_object.downvotes }}"</li>
     {% endfor %}
     </ul>
 {% else %}
     <p>No polls are available.</p>
 {% endif %}
+{% endblock %}

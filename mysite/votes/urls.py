@@ -5,10 +5,8 @@ from . import views
 urlpatterns = [
     # ex: /votes/
     url(r'^$', views.index, name='index'),
-    # ex: /votes/5/
-    url(r'^(?P<question_id>[0-9]+)/$', views.detail, name='detail'),
-    # ex: /votes/5/results/
-    url(r'^(?P<question_id>[0-9]+)/results/$', views.results, name='results'),
-    # ex: /votes/5/vote/
-    url(r'^(?P<question_id>[0-9]+)/vote/$', views.vote, name='vote'),
+    # ex: /votes/5/upvote/
+    url(r'^(?P<question_id>[0-9]+)/upvote/$', views.upvote, name='upvote'),
+    # ex: /votes/5/downvote/
+    url(r'^(?P<question_id>[0-9]+)/downvote/$', views.downvote, name='downvote'),
 ]
