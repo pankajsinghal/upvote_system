@@ -1,9 +1,31 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse,JsonResponse
 from django.template import RequestContext, loader
 from .models import Photo
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+import functools
+from django.core.exceptions import ObjectDoesNotExist
+import exceptions
+
+
+def validate_user_and_photo(method):
+    @functools.wraps(method)
+    def wrapper(self,*args, **kwargs):
+        try:
+	    user = User.objects.get(id=self.user.id)
+        except ObjectDoesNotExist:
+	    user = None
+	if user is None:
+            return JsonResponse(dict(status='error',reason='invalid user'))
+        try:
+	    photo = Photo.objects.get(id=kwargs['photo_id'])
+        except ObjectDoesNotExist:
+            photo = None
+	if not photo:
+            return JsonResponse(dict(status='error',reason='invalid photo'))
+        return method(self, user, photo, *args, **kwargs)
+    return wrapper
 
 # Create your views here.
 @login_required(login_url='/login')
@@ -21,19 +43,20 @@ def index(request):
         downvotes_list_names = []
         for user in downvotes_list:
                 downvotes_list_names.append(user.get_full_name())
-	photo_object = dict(name = photo.image.name , url=photo.image.url, upvotes = upvotes_list_names, downvotes = downvotes_list_names)
+	photo_object = dict(photo_id =photo.id, photo_name = photo.image.name , photo_url=photo.image.url, upvotes_names = upvotes_list_names,num_upvotes_names=len(upvotes_list_names), downvotes_names = downvotes_list_names, num_downvotes_names = len(downvotes_list_names))
 	photo_result.append(photo_object)
     user = User.objects.get(pk=request.user.id)
     user_result = dict()
-    photos_upvoted = user.upvotes.all()
-    photos_upvotes_names = []
-    for photo in photos_upvoted:
-    	photos_upvotes_names.append(photo.image.name)
-    photos_downvoted = user.downvotes.all()
-    photos_downvotes_names = []
-    for photo in photos_downvoted:
-    	photos_downvotes_names.append(photo.image.name)
-    user_result = dict(upvotes = photos_upvotes_names, downvotes = photos_downvotes_names)
+    if user:
+    	photos_upvoted = user.upvotes.all()
+    	photos_upvotes_ids = []
+    	for photo in photos_upvoted:
+    		photos_upvotes_ids.append(photo.id)
+    	photos_downvoted = user.downvotes.all()
+    	photos_downvotes_ids = []
+    	for photo in photos_downvoted:
+    		photos_downvotes_ids.append(photo.id)
+    	user_result = dict(upvotes = photos_upvotes_ids, downvotes = photos_downvotes_ids)
     template = loader.get_template('votes/index.html')
     print str(photo_result) + str(user_result)
     context = RequestContext(request, {
@@ -42,9 +65,39 @@ def index(request):
     })
     return HttpResponse(template.render(context))
 
-def upvote(request, question_id):
-    return HttpResponse("You're looking at question %s." % question_id)
+def returnJsonResponse(status,reason=None):
+    return JsonResponse(dict(status=status, reason=reason))
 
-def downvote(request, question_id):
-    response = "You're looking at the results of question %s."
-    return HttpResponse(response % question_id)
+@validate_user_and_photo
+def upvote(request,user,photo,photo_id):
+    if not photo.is_upvoted(user):
+	photo.upvote(user)
+    	photo.remove_downvote(user)
+	return returnJsonResponse('ok')
+    else:
+	return returnJsonResponse('error','you have already upvoted this photo')
+
+@validate_user_and_photo
+def remove_upvote(request,user,photo,photo_id):
+    if photo.is_upvoted(user):
+        photo.remove_upvote(user)
+	return returnJsonResponse('ok')
+    else:
+	return returnJsonResponse('error','you have not upvoted this photo')
+
+@validate_user_and_photo
+def downvote(request,user,photo,photo_id):
+    if not photo.is_downvoted(user):
+        photo.downvote(user)
+	photo.remove_upvote(user)
+    	return returnJsonResponse('ok')
+    else:
+        return returnJsonResponse('error','you have already downvoted this photo')
+
+@validate_user_and_photo
+def remove_downvote(request,user,photo,photo_id):
+    if photo.is_downvoted(user):
+        photo.remove_downvote(user)
+    	return returnJsonResponse('ok')
+    else:
+        return returnJsonResponse('error','you have not downvoted this photo')
