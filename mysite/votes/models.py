@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
+import os,sys
+from PIL import Image
 
 # Create your models here.
 class Photo(models.Model):
@@ -39,3 +41,16 @@ class Photo(models.Model):
                 return False
         except ObjectDoesNotExist:
            return False
+
+    @staticmethod
+    def add_photos(path):
+	for file_name in os.listdir(path):
+	    if os.path.isfile(os.path.join(path, file_name)):
+		print "adding " + str(file_name)
+		try:
+			i = Image.open(os.path.join(path, file_name))
+			p = Photo(image = i)#os.path.join(path, file_name))
+			p.save()
+			print "added " + str(file_name)
+		except Exception as e:
+			print e

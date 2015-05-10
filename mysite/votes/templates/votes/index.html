@@ -4,7 +4,7 @@
     <ul>
     {% for photo_object in photo_result %}
         <div id="owl-demo" class="owl-carousel owl-theme">
-       	   <div class="item"><img src="static/photos/{{photo_object.photo_url}}" alt = {{ photo_object.photo_name }}></div>
+       	   <div class="item"><img src="static/photos/{{photo_object.photo_name}}" alt = {{ photo_object.photo_name }}></div>
        	   <li>id : {{ photo_object.photo_id }}"</li>
        	   <li>name : {{ photo_object.photo_name }}"</li>
        	   <li>upvotes({{photo_object.num_upvotes_names}}) : {{ photo_object.upvotes_names }}"</li>

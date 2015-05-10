@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 import functools
 from django.core.exceptions import ObjectDoesNotExist
-import exceptions
+import exceptions,os
 
 
 def validate_user_and_photo(method):
@@ -43,7 +43,7 @@ def index(request):
         downvotes_list_names = []
         for user in downvotes_list:
                 downvotes_list_names.append(user.get_full_name())
-	photo_object = dict(photo_id =photo.id, photo_name = photo.image.name , photo_url=photo.image.url, upvotes_names = upvotes_list_names,num_upvotes_names=len(upvotes_list_names), downvotes_names = downvotes_list_names, num_downvotes_names = len(downvotes_list_names))
+	photo_object = dict(photo_id =photo.id, photo_name = photo.image.name.split(os.path.sep)[-1] , photo_url=photo.image.url, upvotes_names = upvotes_list_names,num_upvotes_names=len(upvotes_list_names), downvotes_names = downvotes_list_names, num_downvotes_names = len(downvotes_list_names))
 	photo_result.append(photo_object)
     user = User.objects.get(pk=request.user.id)
     user_result = dict()
