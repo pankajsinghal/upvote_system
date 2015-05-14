@@ -49,7 +49,7 @@ class Photo(models.Model):
 		print "adding " + str(file_name)
 		try:
 			i = Image.open(os.path.join(path, file_name))
-			p = Photo(image = i)#os.path.join(path, file_name))
+			p = Photo(image = os.path.join(path, file_name))
 			p.save()
 			print "added " + str(file_name)
 		except Exception as e:

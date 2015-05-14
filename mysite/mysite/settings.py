@@ -14,7 +14,9 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MEDIA_ROOT = '/Users/pankaj/Desktop/stuff/personal/workspace/Workspace Hike server/upvote_system/static/photos'
+MEDIA_ROOT = BASE_DIR + '/../static/photos'
+
+print MEDIA_ROOT
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
