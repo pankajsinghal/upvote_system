@@ -1,51 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 {% extends "base.html" %}
 {% block content %}
-{% if photo_result %}
-    <ul>
-    {% for photo_object in photo_result %}
-        <div id="owl-demo" class="owl-carousel owl-theme">
-       	   <div class="item"><img src="static/photos/{{photo_object.photo_name}}" alt = {{ photo_object.photo_name }}></div>
-       	   <li>id : {{ photo_object.photo_id }}"</li>
-       	   <li>name : {{ photo_object.photo_name }}"</li>
-       	   <li>upvotes({{photo_object.num_upvotes_names}}) : {{ photo_object.upvotes_names }}"</li>
-       	   <li>downvotes({{photo_object.num_downvotes_names}}) : {{ photo_object.downvotes_names }}"</li>
-	</div>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No polls are available.</p>
-{% endif %}
+{% load json_filters %}
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Images</title>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css" />
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
+<link href="static/FBPhotoBox/css/fbphotobox.css" rel="stylesheet" type="text/css" />
+<script src="static/FBPhotoBox/js/fbphotobox.js"></script>
+<script src="static/OscarGodson/jKey/jquery.jkey.js"></script>
+<script>
 
+	var a = {{photo_result|tojson|safe}};
+	function callLike(){  alert(photo_data_holder)}
+	$(document).jkey('left',function(){
+		$(".left-arrow").click();
+	});
+        $(document).jkey('right',function(){
+        	$(".right-arrow").click();
+        });
+        $(document).jkey('esc',function(){
+        	$(".fbphotobox-close-btn a").click();
+        });
+	$(document).ready(function() {
+		$(".fbphotobox img").fbPhotoBox({
+			rightWidth: 360,
+			leftBgColor: "black",
+			rightBgColor: "white",
+			footerBgColor: "black",
+			overlayBgColor: "#222",
+			containerClassName: 'fbphotobox',
+			imageClassName: 'photo',
+			onImageShow: function() {
+				$(".fbphotobox img").fbPhotoBox("addTags",
+						[{x:0.3,y:0.3,w:0.3,h:0.3}]
+				);
+				$(".fbphotobox-image-content").html('<div style="font-size:16px;">'+$(this).attr("alt")+'</div>'+$(this).attr("src")+ '<div class="margin20px"><span id="likeButton" onclick="callLike();">Like</span></div>');
+			}
+		});
+		
+	});
 
-<script  type="text/javascript">
-$(document).ready(function() {
- 
-  $("#owl-demo").owlCarousel({
- 
-      navigation : true, // Show next and prev buttons
-      slideSpeed : 300,
-      paginationSpeed : 400,
-      singleItem:true
- 
-      // "singleItem:true" is a shortcut for:
-      // items : 1, 
-      // itemsDesktop : false,
-      // itemsDesktopSmall : false,
-      // itemsTablet: false,
-      // itemsMobile : false
- 
-  });
- 
-});
+	
 </script>
-
-<style type="text/css">
-#owl-demo .item img{
-    display: block;
-    width: 20%;
-    height: 20%;
-}
+<style>
+	body {
+		font-family: 'lucida grande', tahoma, verdana, arial, sans-serif;
+		font-size: 13px;
+		position: relative;
+	}
+	
+	.fbphotobox img {
+		width:200px;
+		height:200px;
+		margin:10px;
+		border-radius:5px;
+	}
+	
+	.fbphotobox img:hover {
+		box-sizing:border-box;
+		  -moz-box-sizing:border-box;
+		  -webkit-box-sizing:border-box;
+		border: 5px solid #4AE;
+	}
 </style>
+</head>
+<body>
+	{% if photo_result %}
+		<div class="fbphotobox">
+		 {% for photo_object in photo_result %}
+			<a><img class="photo" data-photo_id={{photo_object.photo_id}} fbphotobox-src="static/photos/{{photo_object.photo_name}}" alt="{{ photo_object.photo_id }}" src="static/photos/{{photo_object.photo_name}}"/></a>
+		 {% endfor %}
+		</div>
+	{% else %}
+    		<p>No polls are available.</p>
+	{% endif %}
+</body>
+</html>
 
 
 {% endblock %}
