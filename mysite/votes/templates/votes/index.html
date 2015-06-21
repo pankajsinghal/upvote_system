@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 {% extends "base.html" %}
 {% block content %}
-{% load json_filters %}
+{% load tojson%}
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -16,7 +16,8 @@
 <script>
 
 	var a = {{photo_result|tojson|safe}};
-	function callLike(){  alert(photo_data_holder)}
+	var user_result = {{user_result|tojson|safe}}
+	function callLike(){  alert(a[0])}
 	$(document).jkey('left',function(){
 		$(".left-arrow").click();
 	});
@@ -39,11 +40,22 @@
 				$(".fbphotobox img").fbPhotoBox("addTags",
 						[{x:0.3,y:0.3,w:0.3,h:0.3}]
 				);
-				$(".fbphotobox-image-content").html('<div style="font-size:16px;">'+$(this).attr("alt")+'</div>'+$(this).attr("src")+ '<div class="margin20px"><span id="likeButton" onclick="callLike();">Like</span></div>');
+				$(".fbphotobox-image-content").html(generateHtmlForPhotoPopup($(this).attr("alt")));
 			}
 		});
 		
 	});
+
+	function generateHtmlForPhotoPopup(id){
+
+	var picLiked = jQuery.inArray(id,user_result["upvotes"]) > -1;
+	var picDisliked = jQuery.inArray(id,user_result["downvotes"]) > -1;
+	var html = '<div style="font-size:16px;"> name : '+a[id]['photo_name']+'</div>' +
+			'<div style="font-size:16px;"> upvotes('+a[id]['upvotes_names'].length+') : '+a[id]['upvotes_names']+'</div>' +
+			'<div style="font-size:16px;"> downvotes('+a[id]['downvotes_names'].length+') : '+a[id]['downvotes_names']+'</div>' +
+			'<div class="margin20px"><span id="likeButton" onclick="callLike();">Like</span></div>' + picLiked + picDisliked;
+	return html
+	}
 
 	
 </script>
@@ -72,8 +84,8 @@
 <body>
 	{% if photo_result %}
 		<div class="fbphotobox">
-		 {% for photo_object in photo_result %}
-			<a><img class="photo" data-photo_id={{photo_object.photo_id}} fbphotobox-src="static/photos/{{photo_object.photo_name}}" alt="{{ photo_object.photo_id }}" src="static/photos/{{photo_object.photo_name}}"/></a>
+		 {% for key,value in photo_result.iteritems %}
+			<a><img class="photo"  alt="{{ key }}" src="static/photos/{{value.photo_name}}"/></a>
 		 {% endfor %}
 		</div>
 	{% else %}

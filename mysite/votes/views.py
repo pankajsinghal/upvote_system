@@ -31,7 +31,7 @@ def validate_user_and_photo(method):
 @login_required(login_url='/login')
 def index(request):
     photos_list = Photo.objects.all()
-    photo_result = []
+    photo_result = {}
     for photo in photos_list:
 	if not photo or not photo.image:
 		continue
@@ -43,8 +43,8 @@ def index(request):
         downvotes_list_names = []
         for user in downvotes_list:
                 downvotes_list_names.append(user.get_full_name())
-	photo_object = dict(photo_id =photo.id, photo_name = photo.image.name.split(os.path.sep)[-1] , photo_url=photo.image.url, upvotes_names = upvotes_list_names,num_upvotes_names=len(upvotes_list_names), downvotes_names = downvotes_list_names, num_downvotes_names = len(downvotes_list_names))
-	photo_result.append(photo_object)
+	photo_object = dict(photo_name = photo.image.name.split(os.path.sep)[-1], photo_url=photo.image.url, upvotes_names = upvotes_list_names, downvotes_names = downvotes_list_names)
+	photo_result[photo.id] = photo_object
     user = User.objects.get(pk=request.user.id)
     user_result = dict()
     if user:

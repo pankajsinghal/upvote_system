@@ -10,6 +10,7 @@ Steps to Run:
 5. in upvote\_system/mysite run python manage.py shell
 	a) from votes.models import Photo
 	b) Photo.add_photos('../static/photos')
+6. visit 127.0.0.1:8000/admin to create users. 
 6. visit 127.0.0.1:8000/votes to see all the photos and votes
 
 
