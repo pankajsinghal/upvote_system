@@ -1,5 +1,6 @@
 # upvote\_system
-image upvote downvote system
+Image upvote downvote system(like instagram :P)
+(My first attempt on django framework)
 
 Steps to Run:
 
