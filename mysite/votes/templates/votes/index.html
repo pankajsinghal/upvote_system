@@ -13,11 +13,110 @@
 <link href="static/FBPhotoBox/css/fbphotobox.css" rel="stylesheet" type="text/css" />
 <script src="static/FBPhotoBox/js/fbphotobox.js"></script>
 <script src="static/OscarGodson/jKey/jquery.jkey.js"></script>
+<style>
+.selected{
+	background-color: green;
+}
+</style>
 <script>
 
 	var a = {{photo_result|tojson|safe}};
 	var user_result = {{user_result|tojson|safe}}
-	function callLike(){  alert(a[0])}
+	var username = "{{username|safe}}"
+	function callLike(id,obj){
+		if(!$(obj).hasClass("selected") ){
+			$.ajax({
+				url: '/votes/'+id+'/upvote/',
+				type: "GET",
+				success: function(data){
+						//data contains response json sent from server
+						$(obj).addClass("selected");
+						$(obj).next().removeClass("selected");
+						var index = a[id]['upvotes_names'].indexOf(username);
+						if(index < 0){
+							a[id]['upvotes_names'].push(username);
+						}
+						var index = a[id]['downvotes_names'].indexOf(username);
+						if(index > -1){
+							a[id]['downvotes_names'].splice(index,1);
+						}
+						$("#upvotes").html('upvotes('+a[id]['upvotes_names'].length+') : '+getUpvotes(id));
+						$("#downvotes").html('downvotes('+a[id]['downvotes_names'].length+') : '+getDownvotes(id));
+				},
+				error: function(data){
+				  alert("ERROR : " + JSON.stringify(data));
+				}
+			});
+
+		}else{
+			$.ajax({
+				url: '/votes/'+id+'/remove_upvote/',
+				type: "GET",
+				success: function(data){
+						//data contains response json sent from server
+						$(obj).removeClass("selected");
+						var index = a[id]['upvotes_names'].indexOf(username);
+						if (index > -1) {
+							a[id]['upvotes_names'].splice(index, 1);
+						}
+						$("#upvotes").html('upvotes('+a[id]['upvotes_names'].length+') : '+getUpvotes(id));
+						$("#downvotes").html('downvotes('+a[id]['downvotes_names'].length+') : '+getDownvotes(id));
+
+				},
+				error: function(data){
+					alert("ERROR : " + JSON.stringify(data));
+				}
+			});
+		}
+	}
+	function callDisLike(id,obj){
+		if(!$(obj).hasClass("selected") ){
+
+			$.ajax({
+				url: '/votes/'+id+'/downvote/',
+				type: "GET",
+				success: function(data){
+						//data contains response json sent from server
+						$(obj).addClass("selected");
+						$(obj).prev().removeClass("selected");
+						var index = a[id]['downvotes_names'].indexOf(username);
+						if(index < 0){
+							a[id]['downvotes_names'].push(username);
+						}
+						var index = a[id]['upvotes_names'].indexOf(username);
+						if(index > -1){
+							a[id]['upvotes_names'].splice(index,1);
+						}
+						$("#upvotes").html('upvotes('+a[id]['upvotes_names'].length+') : '+getUpvotes(id));
+						$("#downvotes").html('downvotes('+a[id]['downvotes_names'].length+') : '+getDownvotes(id));
+
+				},
+				error: function(data){
+					alert("ERROR : " + JSON.stringify(data));
+				}
+			});
+		}else{
+
+				$.ajax({
+					url: '/votes/'+id+'/remove_downvote/',
+					type: "GET",
+					success: function(data){
+							//data contains response json sent from server
+							$(obj).removeClass("selected");
+							var index = a[id]['downvotes_names'].indexOf(username);
+							if (index > -1) {
+								a[id]['downvotes_names'].splice(index, 1);
+							}
+							$("#upvotes").html('upvotes('+a[id]['upvotes_names'].length+') : '+getUpvotes(id));
+							$("#downvotes").html('downvotes('+a[id]['downvotes_names'].length+') : '+getDownvotes(id));
+
+					},
+					error: function(data){
+						alert("ERROR : " + JSON.stringify(data));
+					}
+				});
+		}
+	}
 	$(document).jkey('left',function(){
 		$(".left-arrow").click();
 	});
@@ -43,21 +142,71 @@
 				$(".fbphotobox-image-content").html(generateHtmlForPhotoPopup($(this).attr("alt")));
 			}
 		});
-		
+
 	});
 
 	function generateHtmlForPhotoPopup(id){
 
-	var picLiked = jQuery.inArray(id,user_result["upvotes"]) > -1;
-	var picDisliked = jQuery.inArray(id,user_result["downvotes"]) > -1;
-	var html = '<div style="font-size:16px;"> name : '+a[id]['photo_name']+'</div>' +
-			'<div style="font-size:16px;"> upvotes('+a[id]['upvotes_names'].length+') : '+a[id]['upvotes_names']+'</div>' +
-			'<div style="font-size:16px;"> downvotes('+a[id]['downvotes_names'].length+') : '+a[id]['downvotes_names']+'</div>' +
-			'<div class="margin20px"><span id="likeButton" onclick="callLike();">Like</span></div>' + picLiked + picDisliked;
-	return html
+		id = Number(id)
+		var picLiked = jQuery.inArray(id,user_result["upvotes"]) > -1;
+		var picDisliked = jQuery.inArray(id,user_result["downvotes"]) > -1;
+		var likeSelected = picLiked ? "selected": "";
+		var dislikeSelected =picDisliked? "selected": "";
+		var html = '<div style="font-size:16px;"> name : '+a[id]['photo_name']+'</div>' +
+				'<div id="upvotes" style="font-size:16px;position: relative"> upvotes('+a[id]['upvotes_names'].length+') : '+getUpvotes(id)+'</div>' +
+				'<div id="downvotes" style="font-size:16px;position: relative" > downvotes('+a[id]['downvotes_names'].length+') : '+getDownvotes(id)+'</div>' +
+				'<div class="margin20px"><span class="'+likeSelected+'" id="likeButton" onclick="callLike('+id+',this);">Like</span><span class="'+dislikeSelected+'"  id="dislikeButton" onclick="callDisLike('+id+',this);">Dislike</span></div>' ;
+		return html
+	}
+	function  getUpvotes(id) {
+		// body...
+		if(!a[id]['upvotes_names'].length){
+			return "";
+		}else if(a[id]['upvotes_names'].length ==1){
+			return a[id]['upvotes_names'][0];
+		}else{
+			return 'You and <span onmouseout="hideUpvotes('+id+')"  onmouseover="showAllUpvotes('+id+')">'+(a[id]['upvotes_names'].length-1 )+' others</span> like this';
+
+		}
+
+	}
+	function hideUpvotes(id) {
+		$("#hoverUpvotes").remove();
+	}
+	function showAllUpvotes(id){
+		var htmlP='';
+		for(var i=0;i<a[id]['upvotes_names'].length;i++){
+			htmlP+= '<div>'+a[id]['upvotes_names'][i]+'</div>';
+		}
+		html= '<div id="hoverUpvotes" style="position: absolute;width: 200px;z-index: 100;background-color: #999;left: 100px;">'+htmlP+'</div>';
+		$("#upvotes").append(html);
 	}
 
-	
+	function  getDownvotes(id) {
+		// body...
+		if(!a[id]['downvotes_names'].length){
+			return "";
+		}else if(a[id]['downvotes_names'].length ==1){
+			return a[id]['downvotes_names'][0];
+		}else{
+			return 'You and <span onmouseout="hideDownvotes('+id+')"  onmouseover="showAllDownvotes('+id+')">'+(a[id]['downvotes_names'].length-1 )+' others</span> unlike this';
+
+		}
+
+	}
+	function hideDownvotes(id) {
+		$("#hoverDownvotes").remove();
+	}
+	function showAllDownvotes(id){
+		var htmlP='';
+		for(var i=0;i<a[id]['downvotes_names'].length;i++){
+			htmlP+= '<div>'+a[id]['downvotes_names'][i]+'</div>';
+		}
+		html= '<div id="hoverDownvotes" style="position: absolute;width: 200px;z-index: 100;background-color: #999;left: 100px;">'+htmlP+'</div>';
+		$("#downvotes").append(html);
+	}
+
+
 </script>
 <style>
 	body {
@@ -65,14 +214,14 @@
 		font-size: 13px;
 		position: relative;
 	}
-	
+
 	.fbphotobox img {
 		width:200px;
 		height:200px;
 		margin:10px;
 		border-radius:5px;
 	}
-	
+
 	.fbphotobox img:hover {
 		box-sizing:border-box;
 		  -moz-box-sizing:border-box;

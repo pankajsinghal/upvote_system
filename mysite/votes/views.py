@@ -61,12 +61,13 @@ def index(request):
     print str(photo_result) + str(user_result)
     context = RequestContext(request, {
         'photo_result': photo_result,
-	'user_result' : user_result
+	'user_result' : user_result,
+    'username' : request.user.get_full_name()
     })
     return HttpResponse(template.render(context))
 
-def returnJsonResponse(status,reason=None):
-    return JsonResponse(dict(status=status, reason=reason))
+def returnJsonResponse(status,reason=None,http_status_code=200):
+    return JsonResponse(dict(status=status, reason=reason),status=http_status_code)
 
 @validate_user_and_photo
 def upvote(request,user,photo,photo_id):
@@ -75,7 +76,7 @@ def upvote(request,user,photo,photo_id):
     	photo.remove_downvote(user)
 	return returnJsonResponse('ok')
     else:
-	return returnJsonResponse('error','you have already upvoted this photo')
+	return returnJsonResponse('error','you have already upvoted this photo',400)
 
 @validate_user_and_photo
 def remove_upvote(request,user,photo,photo_id):
@@ -83,7 +84,7 @@ def remove_upvote(request,user,photo,photo_id):
         photo.remove_upvote(user)
 	return returnJsonResponse('ok')
     else:
-	return returnJsonResponse('error','you have not upvoted this photo')
+	return returnJsonResponse('error','you have not upvoted this photo',400)
 
 @validate_user_and_photo
 def downvote(request,user,photo,photo_id):
@@ -92,7 +93,7 @@ def downvote(request,user,photo,photo_id):
 	photo.remove_upvote(user)
     	return returnJsonResponse('ok')
     else:
-        return returnJsonResponse('error','you have already downvoted this photo')
+        return returnJsonResponse('error','you have already downvoted this photo',400)
 
 @validate_user_and_photo
 def remove_downvote(request,user,photo,photo_id):
@@ -100,4 +101,4 @@ def remove_downvote(request,user,photo,photo_id):
         photo.remove_downvote(user)
     	return returnJsonResponse('ok')
     else:
-        return returnJsonResponse('error','you have not downvoted this photo')
+        return returnJsonResponse('error','you have not downvoted this photo',400)
