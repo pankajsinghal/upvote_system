@@ -18,5 +18,5 @@ Steps to Run:
 Sources:
 https://docs.djangoproject.com/en/1.8/intro/tutorial01/
 http://www.effectivedjango.com/tutorial/authzn.html
-https://docs.djangoproject.com/en/1.8/topics/db/examples/many\_to\_many/
+https://docs.djangoproject.com/en/1.8/topics/db/examples/many_to_many/
 http://francoisgaudin.com/2013/08/22/decorators-in-django/
